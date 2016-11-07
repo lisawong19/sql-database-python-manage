@@ -113,7 +113,7 @@ def run_example():
         print_item(item)
     print("\n\n")
 
-    # List SQL databse usage
+    # List SQL database usage
     print('List SQL database usage')
     for item in sql_client.databases.list_usages(GROUP_NAME, SERVER_NAME, DATABASE_NAME):
         print_metric(item)
