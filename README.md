@@ -6,12 +6,22 @@ author: lmazuel
 
 # Getting Started with Azure SQL Management in Python
 
-FIXME
+This sample shows how to manage SQL Server using the Azure Storage Resource Provider for Python.
 
 **On this page**
 
 - [Run this sample](#run)
 - [What is example.py doing?](#example)
+    - [Create a SQL Server instance](#create-server)
+    - [List servers by resource group](#list-servers-by-resource-group)
+    - [List servers by subscription](#list-servers-by-subscription)
+    - [List server usages](#list-server-usages)
+    - [Create a database](#create-database)
+    - [Get a database](#get-database)
+    - [List databases](#list-databases)
+    - [List database usages](#list-database-usages)
+    - [Delete a database](#delete-database)
+    - [Delete a SQL Server instance](#delete-server)
 - [More information](#more-info)
 
 <a name="run"></a>
@@ -64,7 +74,137 @@ or [Azure Portal](http://azure.microsoft.com/documentation/articles/resource-gro
 <a id="example"></a>
 ## What is example.py doing?
 
-FIXME
+The sample walks you through several SQL Server operations.
+It starts by setting up a ResourceManagementClient and SQLManagementClient objects
+using your subscription and credentials.
+
+```python
+#
+# Create the Resource Manager Client with an Application (service principal) token provider
+#
+subscription_id = os.environ.get(
+    'AZURE_SUBSCRIPTION_ID',
+    '11111111-1111-1111-1111-111111111111') # your Azure Subscription Id
+credentials = ServicePrincipalCredentials(
+    client_id=os.environ['AZURE_CLIENT_ID'],
+    secret=os.environ['AZURE_CLIENT_SECRET'],
+    tenant=os.environ['AZURE_TENANT_ID']
+)
+resource_client = ResourceManagementClient(credentials, subscription_id)
+sql_client = SqlManagementClient(credentials, subscription_id)
+
+# You MIGHT need to add SQL as a valid provider for these credentials
+# If so, this operation has to be done only once for each credential
+resource_client.providers.register('Microsoft.Sql')
+
+# Create Resource group
+resource_group_params = {'location':'westus'}
+resource_client.resource_groups.create_or_update(GROUP_NAME, resource_group_params)
+```
+
+There are also a few supporting functions (`print_item`, `print_metrics`, and `print_properties`).
+
+<a id="create-server"></a>
+### Create a SQL Server instance
+
+```python
+server = sql_client.servers.create_or_update(
+    GROUP_NAME,
+    SERVER_NAME,
+    {
+        'location': REGION,
+        'version': '12.0', # Required for create
+        'administrator_login': 'mysecretname', # Required for create
+        'administrator_login_password': 'HusH_Sec4et' # Required for create
+    }
+)
+```
+
+<a id="get-server"></a>
+### Get a server
+
+```python
+server = sql_client.servers.get_by_resource_group(
+    GROUP_NAME,
+    SERVER_NAME,
+)
+```
+
+
+<a id="list-servers-by-resource-group"></a>
+### List servers by resource group
+
+```python
+sql_client.servers.list_by_resource_group(GROUP_NAME)
+```
+
+<a id="list-servers-by-subscription"></a>
+### List servers by subscription
+
+```python
+sql_client.servers.list()
+```
+
+<a id="list-server-usages"></a>
+### List server usages
+
+```python
+sql_client.servers.list_usages(GROUP_NAME, SERVER_NAME)
+```
+
+<a id="create-database"></a>
+### Create a database
+
+```python
+async_db_create = sql_client.databases.create_or_update(
+    GROUP_NAME,
+    SERVER_NAME,
+    DATABASE_NAME,
+    {
+        'location': REGION
+    }
+)
+database = async_db_create.result() # Wait for completion and return created object
+```
+
+<a id="get-database"></a>
+### Get a database
+
+```python
+database = sql_client.databases.get(
+    GROUP_NAME,
+    SERVER_NAME,
+    DATABASE_NAME
+)
+```
+
+<a id="list-databases"></a>
+### Get a list of databases
+
+```python
+sql_client.databases.list_by_server(GROUP_NAME, SERVER_NAME)
+```
+
+<a id="list-usages"></a>
+### Get a list of database usages
+
+```python
+sql_client.databases.list_usages(GROUP_NAME, SERVER_NAME, DATABASE_NAME)
+```
+
+<a id="delete-database"></a>
+### Delete a database
+
+```python
+sql_client.databases.delete(GROUP_NAME, SERVER_NAME, DATABASE_NAME)
+```
+
+<a id="delete-server"></a>
+### Delete a SQL Server instance
+
+```python
+sql_client.servers.delete(GROUP_NAME, SERVER_NAME)
+```
 
 <a name="more-info"></a>
 ## More information
