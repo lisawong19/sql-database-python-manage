@@ -56,6 +56,17 @@ def run_example():
     print_item(server)
     print('\n\n')
 
+    # Open access to this server for IPs
+    print("Add firewall rule")
+    firewall_rule = sql_client.servers.create_or_update_firewall_rule(
+        GROUP_NAME,
+        SERVER_NAME,
+        "firewall_rule_name_123.123.123.123",
+        "123.123.123.123", # Start ip range
+        "123.123.123.123"  # End ip range
+    )
+    print_item(firewall_rule)
+
     # Get SQL server
     print('Get SQL server')
     server = sql_client.servers.get_by_resource_group(
@@ -144,7 +155,8 @@ def print_item(group):
     print("\tName: {}".format(group.name))
     print("\tId: {}".format(group.id))
     print("\tLocation: {}".format(group.location))
-    print("\tTags: {}".format(group.tags))
+    if hasattr(group, 'tags'):
+        print("\tTags: {}".format(group.tags))
     if hasattr(group, 'properties'):
         print_properties(group.properties)
 
