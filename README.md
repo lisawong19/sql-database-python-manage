@@ -13,6 +13,7 @@ This sample shows how to manage SQL Server using the Azure Storage Resource Prov
 - [Run this sample](#run)
 - [What is example.py doing?](#example)
     - [Create a SQL Server instance](#create-server)
+    - [Create a Firewall rule](#create-firewall-rule)
     - [List servers by resource group](#list-servers-by-resource-group)
     - [List servers by subscription](#list-servers-by-subscription)
     - [List server usages](#list-server-usages)
@@ -117,6 +118,19 @@ server = sql_client.servers.create_or_update(
         'administrator_login': 'mysecretname', # Required for create
         'administrator_login_password': 'HusH_Sec4et' # Required for create
     }
+)
+```
+
+<a id="create-firewall-rule"></a>
+### Create a firewall rule
+
+```python
+firewall_rule = sql_client.servers.create_or_update_firewall_rule(
+    GROUP_NAME,
+    SERVER_NAME,
+    "firewall_rule_name_123.123.123.123",
+    "123.123.123.123", # Start ip range
+    "123.123.123.123"  # End ip range
 )
 ```
 
